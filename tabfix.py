@@ -26,19 +26,33 @@ def convert_spaces_to_tabs(input_file_name, output_file_name, tab_length):
         output_file.write(tabs+spaces+line_data)
     output_file.close()
 
-def main():
-    argv.pop(0)
-    if len(argv) == 0:
-        print("""\
-Usage:  tabfix [file_name]
-OR      tabfix [file_name] [tab_length]
+def help():
+    print("""\
+Usage:
+        tabfix [options] <file_name>
+OR      tabfix [options] <file_name> <tab_length>
+
+Options:
+  -w, --watch       Watch the file and fix tabs on save.
+  -h, --help        Show this help menu.
+
 (default tab length is 4)\
 """)
-        return
+    exit(0)
 
-    watch_mode = "--watch" in argv
-    if watch_mode:
+def main():
+    argv.pop(0)
+
+    if len(argv) == 0 or "--help" in argv or "-h" in argv:
+        help()
+
+    watch_mode = False
+    while "--watch" in argv:
+        watch_mode = True
         argv.remove("--watch")
+    while "-w" in argv:
+        watch_mode = True
+        argv.remove("-w")
 
     file_name = argv.pop(0)
     if len(argv):
