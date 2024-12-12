@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 from sys import argv
+from shutil import copy2
+from os.path import getmtime
+from time import sleep
 
 def convert_spaces_to_tabs(input_file_name, output_file_name, tab_length):
     input_file = open(input_file_name, "r")
@@ -33,14 +36,29 @@ OR      tabfix [file_name] [tab_length]
 """)
         return
 
+    watch_mode = "--watch" in argv
+    if watch_mode:
+        argv.remove("--watch")
+
     file_name = argv.pop(0)
     if len(argv):
         tab_length = argv.pop(0)
     else:
         tab_length = 4
     
-    output_file_name = ".tabfixed."+file_name
-    convert_spaces_to_tabs(file_name, output_file_name, tab_length)
+    if watch_mode:
+        output_file_name = ".tabbackup."+file_name
+        copy2(file_name, output_file_name)
+        last_modified_time = getmtime(file_name)
+        while True:
+            current_modified_time = getmtime(file_name)
+            if current_modified_time != last_modified_time:
+                last_modified_time = current_modified_time
+                convert_spaces_to_tabs(file_name, file_name, tab_length)
+            sleep(1)
+    else:
+        output_file_name = ".tabfixed."+file_name
+        convert_spaces_to_tabs(file_name, output_file_name, tab_length)
 
 if __name__ == "__main__":
     main()
